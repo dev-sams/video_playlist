@@ -1,0 +1,10 @@
+<div class="col-md-3 mb-4 d-flex">
+  <div class="card flex-fill">
+    <img src="<%= video.thumbnail_url %>" class="card-img-top" alt="<%= video.title %>">
+    <div class="card-body d-flex flex-column">
+      <h5 class="card-title"><%= video.title %></h5>
+      <p class="card-text flex-grow-1"><%= truncate(video.description, length: 100) %></p>
+      <p class="card-text"><small class="text-muted">Views: <%= video.views %></small></p>
+    </div>
+  </div>
+</div>

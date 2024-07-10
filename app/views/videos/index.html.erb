@@ -1,5 +1,15 @@
 <h1 class="text-center my-4"><%= link_to 'Videos', videos_path %></h1>
+
 <div class="container-fluid">
+  <%= form_with url: videos_path, method: :get, local: true, class: 'mb-4' do %>
+    <div class="input-group">
+      <%= text_field_tag :title, params[:title], class: 'form-control', placeholder: 'Search by title' %>
+      <div class="input-group-append">
+        <%= submit_tag 'Search', class: 'btn btn-primary' %>
+      </div>
+    </div>
+  <% end %>
+
   <div class="row">
     <% @videos.each do |video| %>
       <%= render partial: 'video', locals: { video: video } %>
@@ -12,7 +22,7 @@
     <ul class="pagination">
       <% if @page > 1 %>
         <li class="page-item">
-          <%= link_to 'Previous', videos_path(page: @page - 1), class: 'page-link' %>
+          <%= link_to 'Previous', videos_path(page: @page - 1, title: params[:title]), class: 'page-link' %>
         </li>
       <% else %>
         <li class="page-item disabled">
@@ -22,13 +32,13 @@
 
       <% (1..@total_pages).each do |page_number| %>
         <li class="page-item <%= 'active' if page_number == @page %>">
-          <%= link_to page_number, videos_path(page: page_number), class: 'page-link' %>
+          <%= link_to page_number, videos_path(page: page_number, title: params[:title]), class: 'page-link' %>
         </li>
       <% end %>
 
       <% if @page < @total_pages %>
         <li class="page-item">
-          <%= link_to 'Next', videos_path(page: @page + 1), class: 'page-link' %>
+          <%= link_to 'Next', videos_path(page: @page + 1, title: params[:title]), class: 'page-link' %>
         </li>
       <% else %>
         <li class="page-item disabled">

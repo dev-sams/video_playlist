@@ -70,3 +70,4 @@ end
 
 gem "bootstrap"
 gem "sassc-rails"
+gem 'pry-rails'

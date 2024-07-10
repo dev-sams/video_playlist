@@ -1,10 +1,27 @@
-<div class="col-md-3 mb-4 d-flex">
-  <div class="card flex-fill">
+<div class="col-md-4 mb-4">
+  <div class="card">
     <img src="<%= video.thumbnail_url %>" class="card-img-top" alt="<%= video.title %>">
-    <div class="card-body d-flex flex-column">
+    <div class="card-body">
       <h5 class="card-title"><%= video.title %></h5>
-      <p class="card-text flex-grow-1"><%= truncate(video.description, length: 100) %></p>
+      <p class="card-text"><%= truncate(video.description, length: 100) %></p>
       <p class="card-text"><small class="text-muted">Views: <%= video.views %></small></p>
+    </div>
+    <div class="card-footer">
+      <% if params[:playlist_id].present? %>
+        <% playlist_id = params[:playlist_id].to_i %>
+        <% if @playlists.any? %>
+          <% current_playlist = @playlists.find { |pl| pl.id == playlist_id } %>
+          <% if current_playlist %>
+            <% if current_playlist.videos.include?(video) %>
+              <%= button_to 'Remove from Playlist', remove_from_playlist_video_path(video, playlist_id: current_playlist.id), method: :delete, remote: true, class: 'btn btn-danger btn-sm', data: { turbo_frame: "playlist-videos" } %>
+            <% else %>
+              <%= button_to 'Add to Playlist', add_to_playlist_video_path(video, playlist_id: current_playlist.id), method: :post, remote: true, class: 'btn btn-primary btn-sm', data: { turbo_frame: "playlist-videos" } %>
+            <% end %>
+          <% end %>
+        <% end %>
+      <% else %>
+        <p>Select a playlist to manage videos.</p>
+      <% end %>
     </div>
   </div>
 </div>

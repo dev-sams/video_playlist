@@ -2,23 +2,7 @@
 
 <div class="container-fluid">
   <div class="row">
-    <!-- Sidebar for Playlists -->
-    <div class="col-md-3">
-      <h3>Playlists</h3>
-      <ul class="list-group">
-        <li class="list-group-item <%= 'active' if params[:playlist_id].blank? %>">
-          <%= link_to 'All Videos', videos_path %>
-        </li>
-        <% @playlists.each do |playlist| %>
-          <li class="list-group-item <%= 'active' if params[:playlist_id].to_i == playlist.id %>">
-            <%= link_to playlist.name, videos_path(playlist_id: playlist.id) %>
-          </li>
-        <% end %>
-      </ul>
-    </div>
-
-    <!-- Videos -->
-    <div class="col-md-9">
+    <div class="col-md-12">
       <%= form_with url: videos_path, method: :get, local: true, class: 'mb-4' do %>
         <div class="input-group">
           <%= text_field_tag :title, params[:title], class: 'form-control', placeholder: 'Search by title' %>
@@ -29,13 +13,75 @@
       <% end %>
 
       <div class="row">
-        <% @videos.each do |video| %>
-          <%= render partial: 'video', locals: { video: video } %>
-        <% end %>
+        <%= render @videos, partial: 'video' %>
       </div>
     </div>
   </div>
 
-  <!-- Pagination -->
-    <%= render partial: 'pagination', locals: { page: @page, total_pages: @total_pages, title: params[:title], playlist_id: params[:playlist_id] } %>
+  <%= render partial: 'pagination', locals: { page: @page, total_pages: @total_pages, title: params[:title], playlist_id: params[:playlist_id] } %>
 </div>
+
+<!-- Playlist Modal -->
+<div class="modal fade" id="playlistModal" tabindex="-1" role="dialog" aria-labelledby="playlistModalLabel" aria-hidden="true">
+  <div class="modal-dialog" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="playlistModalLabel">Manage Playlists</h5>
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body">
+        <div id="playlist-checkboxes"></div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+        <button type="button" class="btn btn-primary" id="save-playlist-changes">Save changes</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+$(function() {
+  $('#playlistModal').on('show.bs.modal', function(event) {
+    const button = $(event.relatedTarget);
+    const videoId = button.data('video-id');
+    const modal = $(this);
+
+    $.getJSON(`/videos/${videoId}/playlists`, function(data) {
+      const checkboxes = data.playlists.map(playlist => `
+        <div class="form-check">
+          <input class="form-check-input" type="checkbox" value="${playlist.id}" id="playlist-${playlist.id}" ${playlist.included ? 'checked' : ''}>
+          <label class="form-check-label" for="playlist-${playlist.id}">
+            ${playlist.name}
+          </label>
+        </div>
+      `).join('');
+      modal.find('#playlist-checkboxes').html(checkboxes);
+    });
+
+    $('#save-playlist-changes').off('click').on('click', function() {
+      const selectedPlaylists = modal.find('.form-check-input:checked').map(function() {
+        return $(this).val();
+      }).get();
+
+      $.ajax({
+        url: `/videos/${videoId}/update_playlists`,
+        method: 'POST',
+        data: { playlists: selectedPlaylists },
+        dataType: 'json',
+        headers: {
+          'X-CSRF-Token': $('meta[name="csrf-token"]').attr('content')
+        },
+        success: function() {
+          $("[data-dismiss=modal]").trigger({ type: "click" });
+        },
+        error: function(xhr, status, error) {
+          console.error('AJAX error:', status, error);
+        }
+      });
+    });
+  });
+});
+</script>

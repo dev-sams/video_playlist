@@ -6,4 +6,5 @@ Rails.application.routes.draw do
       post 'update_playlists'
     end
   end
+  resources :playlists, only: [:index, :create, :new]
 end

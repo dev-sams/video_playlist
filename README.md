@@ -33,7 +33,6 @@ rake fetch:videos
 ```
 rails s
 ```
-(
 
 Visit `http://localhost:3000`
 
